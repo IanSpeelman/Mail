@@ -1,3 +1,26 @@
 textarea {
     min-height: 400px;
 }
+.read{
+    background-color: rgb(207, 207, 207);
+    border: 1px solid black;
+}
+.unread{
+    background-color: white;
+    border: 1px solid rgb(102, 101, 101);
+}
+.email {
+    padding: 1em;
+    margin-bottom: 1em;
+    display: flex;
+    justify-content: space-between
+}
+.email > button {
+    padding: .2em 1.5em;
+    background-color: #ffffff00;
+    border: 1px solid black;
+    border-radius: .2em;
+}
+.email > button:hover{
+    background-color: #00000030;
+}

@@ -54,13 +54,47 @@ function compose_email() {
 }
 
 function load_mailbox(mailbox) {
- 
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
 
+  // initialize elements already on the page
+  const emailContainer = document.querySelector("#emails-view")
+  
   // Show the mailbox name
-  document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+  emailContainer.innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  //fetch the emails from the backend
+  fetch(`emails/${mailbox}`)
+  .then(res => res.json())
+  .then(res => {
+    console.dir(res)
+
+    //loop over every email
+    for (email of res){
+      // create elements to render on the page
+      const div = document.createElement("div")
+      div.setAttribute("data-email", email.id)
+      const p = document.createElement("p")
+      p.innerHTML = `<span>${email.subject}</span> from: '${email.sender}'`
+      const timestamp = document.createElement("p")
+      timestamp.innerHTML = email.timestamp
+      div.append(p,timestamp)
+      
+      const archive = document.createElement("button")
+      archive.innerText = "Archive"
+      container = document.createElement("div")
+      container.append(div, archive)
+      if (email.read){
+        container.classList.add("read")
+      }
+      else{
+        container.classList.add("unread")
+      }
+      container.classList.add("email")
+      emailContainer.append(container)
+    }
+  })
 
 
 }
