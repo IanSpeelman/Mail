@@ -33,33 +33,38 @@ function compose_email() {
 	body.value = "";
 
 	//add event listener for when the form is submitted
-	form.addEventListener("submit", (e) => {
-		e.preventDefault();
-		//check if all the fields are filled in
-		if (
-			recipient.value !== "" &&
-			subject.value !== "" &&
-			body.value !== ""
-		) {
-			// fields filled in, make api request
-			fetch("/emails", {
-				method: "POST",
-				body: JSON.stringify({
-					recipients: recipient.value,
-					subject: subject.value,
-					body: body.value,
-				}),
-			})
-				.then((res) => {
-					if (res.status === 201) {
-						load_mailbox("sent");
-					}
+	form.addEventListener(
+		"submit",
+		(e) => {
+			e.preventDefault();
+			//check if all the fields are filled in
+			if (
+				recipient.value !== "" &&
+				subject.value !== "" &&
+				body.value !== ""
+			) {
+				// fields filled in, make api request
+				console.log("creating new email");
+				fetch("/emails", {
+					method: "POST",
+					body: JSON.stringify({
+						recipients: recipient.value,
+						subject: subject.value,
+						body: body.value,
+					}),
 				})
-				.catch((err) => console.log("something went wrong: ", err));
-		} else {
-			// fields not filled in, do nothing
-		}
-	});
+					.then((res) => {
+						if (res.status === 201) {
+							load_mailbox("sent");
+						}
+					})
+					.catch((err) => console.log("something went wrong: ", err));
+			} else {
+				// fields not filled in, do nothing
+			}
+		},
+		{ once: true },
+	);
 }
 
 function load_mailbox(mailbox) {
@@ -147,29 +152,37 @@ const showEmail = (id) => {
 			document.querySelector("#reading-time").innerHTML = res.timestamp;
 			document.querySelector("#reading-body").innerHTML = res.body;
 			document.querySelector("#archive").setAttribute("data-email", id);
+			document
+				.querySelector("#archive")
+				.classList.add("btn", "btn-outline-primary", "btn-md");
 
 			// if the email is archived, change the button text to unarchive
 			if (res.archived) {
 				document.querySelector("#archive").innerText = "Unarchive";
 
 				/* if the sender is the same as the current user remove the button alltogether 
-                      (as in the problem set described, "This requirement does not apply to emails in the Sent mailbox") */
+                    (as in the problem set described, "This requirement does not apply to emails in the Sent mailbox") */
+			} else if (!res.archived) {
+				document.querySelector("#archive").innerText = "Archive";
 			} else if (document.querySelector("h2").innerText === res.sender) {
 				document.querySelector("#archive").remove();
 			}
 			document.querySelector("#reply").setAttribute("data-email", id);
+			document
+				.querySelector("#reply")
+				.classList.add("btn", "btn-outline-primary", "btn-md");
 
 			// when button is clicked change the archived state to the opposite than what it was
 			document.querySelector("#archive").addEventListener(
 				"click",
 				(e) => {
+					console.log(`Archiving email with id of ${id}`);
 					fetch(`emails/${id}`, {
 						method: "PUT",
 						body: JSON.stringify({
 							archived: !res.archived,
 						}),
-					});
-					load_mailbox("inbox");
+					}).then(() => load_mailbox("inbox"));
 				},
 				{ once: true },
 			);
